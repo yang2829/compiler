@@ -1,4 +1,5 @@
-/************************* procobj.h **********************/
+#ifndef PROCOBJ_H
+#define PROCOBJ_H
 #include <stdlib.h>
 struct procobjTag
 {
@@ -114,3 +115,5 @@ struct idobjTag *getIdobj(struct procobjTag *p, char *id)
   v = NULL;
   return v;
 }
+
+#endif

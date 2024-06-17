@@ -1,4 +1,5 @@
-/********************** resword.h ******************/
+#ifndef RESWORD_H
+#define RESWORD_H
 #include <stdlib.h>
 #define RESWORDMAX 13
 char reswords[RESWORDMAX][10] =
@@ -15,3 +16,5 @@ int isResword(char *s)
   }
   return -1;
 }
+
+# endif

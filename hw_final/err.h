@@ -1,4 +1,6 @@
-/************************ err.h **********************/
+#ifndef ERR_H
+#define ERR_H
+
 #define ERRMAX 27
 char errmsgs[ERRMAX][36]=
 {
@@ -30,3 +32,5 @@ char errmsgs[ERRMAX][36]=
   "VAR宣告變數重複",            /*errmsgs[25]*/
   "識別字沒有宣告"              /*errmsgs[26]*/
 };
+
+# endif

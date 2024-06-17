@@ -1,4 +1,6 @@
-/*************** followsym.h ***************/
+#ifndef FOLLOWSYM_H
+#define FOLLOWSYM_H
+
 #include "sym.h"
 char factor[symSYMMAX];
 char term[symSYMMAX];
@@ -40,3 +42,5 @@ void followsyminit()
   block[symPERIOD] = 1;
   block[symSEMI] = 1;
 }
+
+# endif

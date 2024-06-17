@@ -2,105 +2,88 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-/*
-** 自訂表頭檔
-*/
-  #include "scanner.h"
-  #include "resword.h"
-  #include "err.h"
-  #include "followsym.h"
-  #include "idobj.h"
-  #include "procobj.h"
-/*
-** 自訂常數
-*/
-  #define IDLEN      36
-  #define BUFSIZE   512
-  #define PROCDEPTH  36
-/*
-** 自訂函式原型
-*/
-  void Identifier();
-  void Number();
-  void IdentifierList();
-  void Factor();
-  void Term();
-  void Expression();
-  void Condition();
-  void WriteStatement();
-  void ReadStatement();
-  void WhileStatement();
-  void IfStatement();
-  void CompoundStatement();
-  void CallStatement();
-  void AssignmentStatement();
-  void Statement();
-  void ProcDeclaration();
-  void VarDeclaration();
-  void ConstDeclaration();
-  void Block();
-  void ProgramHead();
-  void Program();
-/*
-** 整體變數
-*/
-  struct symbolTag *token;
-  int errorCount = 0;
-  struct idobjTag *idobj;
-  char outname[IDLEN];
-  FILE *outfile;
-  int labelCount = 0;
-  int level = -1;
-  char progname[IDLEN];
-  char procname[IDLEN];
-  struct procobjTag *procStack[BUFSIZE];
-  int procTop = 0;
-  struct procobjTag *procobj = NULL;
-  char id[IDLEN];
-  char buf[BUFSIZE];
-/*
-** Error()
-*/
-  void Error(int n)
+// 自訂標頭黨
+#include "scanner.h"
+#include "resword.h"
+#include "err.h"
+#include "followsym.h"
+#include "idobj.h"
+#include "procobj.h"
+// 自訂常數
+#define IDLEN      36
+#define BUFSIZE   512
+#define PROCDEPTH  36
+// function declaration
+void Identifier();
+void Number();
+void IdentifierList();
+void Factor();
+void Term();
+void Expression();
+void Condition();
+void WriteStatement();
+void ReadStatement();
+void WhileStatement();
+void IfStatement();
+void CompoundStatement();
+void CallStatement();
+void AssignmentStatement();
+void Statement();
+void ProcDeclaration();
+void VarDeclaration();
+void ConstDeclaration();
+void Block();
+void ProgramHead();
+void Program();
+// global var
+struct symbolTag *token;
+int errorCount = 0;
+struct idobjTag *idobj;
+FILE *outfile;
+int labelCount = 0;
+int level = -1;
+char progname[IDLEN];
+char procname[IDLEN];
+struct procobjTag *procStack[BUFSIZE];
+int procTop = 0;
+struct procobjTag *procobj = NULL;
+char id[IDLEN];
+char buf[BUFSIZE];
+
+void Error(int n)
+{
+  int j;
+  printf("****");
+  for (j=0; j<=token->right; j++) printf(" ");
+  printf("^%d  %s\n",n, errmsgs[n]);
+  errorCount++;
+}
+
+int checkexist()
+{
+  idobj=getIdobj(procStack[procTop-1], token->value);
+  if (idobj==NULL)
+    return 0;
+  else
+    return 1;
+}
+
+void skip(char follows[], int n)
+{
+  if (follows[token->sym]==0)
   {
-    int j;
-    printf("****");
-    for (j=0; j<=token->right; j++) printf(" ");
-    printf("^%d  %s\n",n, errmsgs[n]);
-    errorCount++;
+    Error(n);
+    while (follows[token->sym]==0)
+      token = nextToken();
   }
-/*
-** checkexist()
-*/
-  int checkexist()
-  {
-    idobj=getIdobj(procStack[procTop-1], token->value);
-    if (idobj==NULL)
-      return 0;
-    else
-      return 1;
-  }
-/*
-** skip()
-*/
-  void skip(char follows[], int n)
-  {
-    if (follows[token->sym]==0)
-    {
-      Error(n);
-      while (follows[token->sym]==0)
-        token = nextToken();
-    }
-  }
-/*
-** 語法規則#1 <Program>
-*/
-  void Program()
-  {
-    ProgramHead();
-    Block();
-    if (token->sym != symPERIOD) Error(0);
-  }
+}
+//#1 <Program>
+void Program()
+{
+  ProgramHead();
+  Block();
+  if (token->sym != symPERIOD) Error(0);
+}
 /*
 ** 語法規則#2 <ProgramHead>
 */
@@ -120,26 +103,7 @@
         procpush(p);
         procStack[procTop++] = p;
         strcpy(progname, token->value);
-        strcpy(outname, token->value);
-        strcat(outname, ".asm");
-        outfile = fopen(outname, "w");
         ++labelCount;
-        sprintf(buf,
-          ";************** %s ****************\n"
-          ";\n"
-          "\tORG\t100H\n"
-          "\tJMP\t_start%d\n"
-          "_intstr\tDB\t'     ','$'\n"
-          "_buf\tTIMES 256 DB ' '\n"
-          "\tDB 13,10,'$'\n",
-          outname, labelCount);
-        fprintf(outfile, buf);
-        strcpy(buf, "%include\t\"dispstr.mac\"\n");
-        strcat(buf, "%include\t\"itostr.mac\"\n");
-        strcat(buf, "%include\t\"readstr.mac\"\n");
-        strcat(buf, "%include\t\"strtoi.mac\"\n");
-        strcat(buf, "%include\t\"newline.mac\"\n");
-        fputs(buf, outfile);
         token = nextToken();
         if (token->sym == symSEMI)
           token = nextToken();
@@ -857,36 +821,63 @@
     else
       Error(22);
   }
-/*
-****************************** 主程式 **********************
-*/
-  int main(int argc, char *argv[])
-  {
-    FILE *f=fopen(argv[1], "r");
-    scanner(f);
-    followsyminit();
-    token = nextToken();
-    Program();
-    fprintf(outfile, "\tMOV\tAX, 4C00H\n"
-                 "\tINT\t21H\n");
-    printf("\n  Plone compile completed. "
-      "\n  Error count : %d\n", errorCount);
-    if (argc==3)
-    {
-      printf("\n程序結構堆疊內容如下：\n%s\n",
-        procobjToString());
+
+void outputfile_init(char* ifname)
+{
+  char outname[IDLEN] = "";
+  for (int temp_i = 0; temp_i < strlen(ifname); temp_i++) {
+    if (ifname[temp_i]=='.' || ifname[temp_i] == '\0') {
+      outname[temp_i] = '\0';
+      break;
     }
-    fclose(outfile);
-    fclose(f);
-    if (errorCount==0)
-    {
-      FILE *batchfile;
-      sprintf(buf, "%s.bat", progname);
-      batchfile=fopen(buf,"w");
-      fprintf(batchfile, "nasmw %s.asm -o %s.com\n",
-              progname, progname);
-      fprintf(batchfile, "%s.com\n", progname);
-      fclose(batchfile);
-     }
-    return 0;
+    outname[temp_i] = ifname[temp_i];
   }
+  strcat(outname, ".asm");
+  outfile = fopen(outname, "w");
+  sprintf(buf,
+          "\tORG\t100H\n"
+          "\tJMP\t_startMAIN\n"
+          "_intstr\tDB\t'     ','$'\n"
+          "_buf\tTIMES 256 DB ' '\n"
+          "\tDB 13,10,'$'\n");
+  fprintf(outfile, buf);
+  strcpy(buf, "%include\t\"dispstr.mac\"\n");
+  strcat(buf, "%include\t\"itostr.mac\"\n");
+  strcat(buf, "%include\t\"readstr.mac\"\n");
+  strcat(buf, "%include\t\"strtoi.mac\"\n");
+  strcat(buf, "%include\t\"newline.mac\"\n");
+  fputs(buf, outfile);
+}
+
+// main
+int main(int argc, char *argv[])
+{
+  FILE *f=fopen(argv[1], "r");
+  scanner(f);
+  followsyminit();
+  token = nextToken();
+  outputfile_init(argv[1]);
+  Program();
+  fprintf(outfile, "\tMOV\tAX, 4C00H\n"
+                "\tINT\t21H\n");
+  printf("\n  Plone compile completed. "
+    "\n  Error count : %d\n", errorCount);
+  if (argc==3)
+  {
+    printf("\n程序結構堆疊內容如下：\n%s\n",
+      procobjToString());
+  }
+  fclose(outfile);
+  fclose(f);
+  if (errorCount==0)
+  {
+    FILE *batchfile;
+    sprintf(buf, "%s.bat", progname);
+    batchfile=fopen(buf,"w");
+    fprintf(batchfile, "nasmw %s.asm -o %s.com\n",
+            progname, progname);
+    fprintf(batchfile, "%s.com\n", progname);
+    fclose(batchfile);
+  }
+  return 0;
+}

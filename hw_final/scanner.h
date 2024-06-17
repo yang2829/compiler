@@ -1,8 +1,10 @@
-/********************** scanner.h ********************/
+#ifndef SCANNER_H
+#define SCANNER_H
 #include <stdio.h>
 #include <stdlib.h>
 #include "sym.h"
 #include "symbol.h"
+#include "resword.h"
 int nextChar;
 int cp = 0;
 int linelen = 0;
@@ -202,3 +204,5 @@ void scanner(FILE *f)
 {
   sourcefile = f;
 }
+
+# endif

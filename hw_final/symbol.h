@@ -1,4 +1,5 @@
-/*************************** symbol.h *********************/
+#ifndef SYMBOL_H
+#define SYMBOL_H
 #include <stdio.h>
 #include <stdlib.h>
 struct symbolTag
@@ -25,3 +26,5 @@ char *symbolToString(struct symbolTag *p)
           p->sym, p->left, p->right, p->value);
   return str;
 }
+
+# endif

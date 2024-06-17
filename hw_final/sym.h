@@ -1,4 +1,6 @@
-//************ sym.h **************
+#ifndef SYM_H
+#define SYM_H
+
 #define symSYMMAX         35
 #define symEOF             0
 #define symerror           1
@@ -35,3 +37,5 @@
 #define symPROCEDURE      32
 #define symPROGRAM        33
 #define symSTRING         34
+
+# endif

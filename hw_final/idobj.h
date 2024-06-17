@@ -1,4 +1,6 @@
-/******************* idobj.h *****************/
+#ifndef IDOBJ_H
+#define IDOBJ_H
+
 struct idobjTag
 {
   char name[36];
@@ -18,3 +20,5 @@ char * idobjToString(struct idobjTag *p)
     p->level, p->procname);
   return str;
 }
+
+# endif
