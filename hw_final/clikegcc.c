@@ -78,7 +78,9 @@ void Program()
       VarDeclaration();
     }
     else {
+      printf("sym: %d\n", token->sym);
       Error(27);
+      token = nextToken();
     }
   }
 }
@@ -100,6 +102,7 @@ void ProcDeclaration()
           Error(-1);
         }
         if (token->sym == symSEMI) {
+          token = nextToken();
           if (temp_i == 0) {
             pl_tail->next = newProc(temp_value, 0);
             pl_tail = pl_tail->next;
@@ -116,7 +119,7 @@ void ProcDeclaration()
           fprintf(outfile,buf);
           strcpy(procname, temp_value);
           Block();
-          if (procname == "main") {
+          if (strcmp(procname, "main") == 0) {
             fprintf(outfile, "\tMOV\tAX, 4C00H\n"
                              "\tINT\t21H\n");
           }
@@ -445,7 +448,7 @@ void Condition()
         fprintf(outfile, buf);
         break;
       case symLESS:
-        sprintf(buf,"\tJGE\t_else%d\n",(++labelCount));
+        sprintf(buf,"\tJGE\t_else%d\n",labelCount);
         fprintf(outfile, buf);
         break;
       case symLEQ:
@@ -798,7 +801,9 @@ void Factor()
 {
   if (token->sym == symIDENTIFIER)
   {
-    struct idlist *tempid = idexist(token->value);
+    char temp_value[IDLEN];
+    strcpy(temp_value, token->value);
+    struct idlist *tempid = idexist(temp_value);
     if (temp_token != NULL) {
       token = temp_token;
       temp_token = NULL;
@@ -809,8 +814,8 @@ void Factor()
       token = nextToken();
       if (token->sym == symRPAREN) {
         token = nextToken();
-        if (procexist(&pl_head, tempid->name, 0) != 0) {
-          sprintf(buf, "\tCALL\t_%s\n", tempid->name);
+        if (procexist(&pl_head, temp_value, 0) != 0) {
+          sprintf(buf, "\tCALL\t_%s\n", temp_value);
           fprintf(outfile, buf);
         }
         else {
