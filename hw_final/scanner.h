@@ -54,7 +54,48 @@ struct symbolTag *nextToken()
                nextChar>='0' && nextChar<='9' ||
                nextChar == '_');
       s[n]='\0';
-      return newSymbol(symIDENTIFIER,linenum,cp,s);
+      int temp = isResword(s);
+      switch (temp)
+      {
+      case 0:
+        return newSymbol(symINT,linenum,cp,s);
+        break;
+      case 1:
+        return newSymbol(symVOID,linenum,cp,s);
+        break;
+      case 2:
+        return newSymbol(symCHARA,linenum,cp,s);
+        break;
+      case 3:
+        return newSymbol(symRETURN,linenum,cp,s);
+        break;
+      case 4:
+        return newSymbol(symIF,linenum,cp,s);
+        break;
+      case 5:
+        return newSymbol(symELSE,linenum,cp,s);
+        break;
+      case 6:
+        return newSymbol(symWHILE,linenum,cp,s);
+        break;
+      case 7:
+        return newSymbol(symDO,linenum,cp,s);
+        break;
+      case 8:
+        return newSymbol(symSCANF,linenum,cp,s);
+        break;
+      case 9:
+        return newSymbol(symPRINTF,linenum,cp,s);
+        break;
+      case 10:
+        return newSymbol(symFOR,linenum,cp,s);
+        break;
+      case 11:
+        return newSymbol(symENDL,linenum,cp,s);
+        break;
+      default:
+        return newSymbol(symIDENTIFIER,linenum,cp,s);
+      }
     }
     else if (nextChar>='0' && nextChar<='9')
     {
@@ -95,6 +136,16 @@ struct symbolTag *nextToken()
         s[n]='\0';
         advance();
         return newSymbol(symRPAREN,linenum,cp, s);
+      case '{':
+        s[n++]=nextChar;
+        s[n]='\0';
+        advance();
+        return newSymbol(symLBRAKET,linenum,cp, s);
+      case '}':
+        s[n++]=nextChar;
+        s[n]='\0';
+        advance();
+        return newSymbol(symRBRAKET,linenum,cp, s);
       case '+':
         s[n++]=nextChar;
         s[n]='\0';
@@ -111,15 +162,42 @@ struct symbolTag *nextToken()
         advance();
         return newSymbol(symMUL,linenum,cp, s);
       case '/':
-        s[n++]=nextChar;
-        s[n]='\0';
         advance();
-        return newSymbol(symDIV,linenum,cp, s);
+        if (nextChar == '/') {
+          do {
+            advance();
+          } while (nextChar != '\n');
+          break;
+        }
+        else {
+          s[n++]='/';
+          s[n]='\0';
+          return newSymbol(symDIV,linenum,cp, s);
+        }
       case '=':
         s[n++]=nextChar;
-        s[n]='\0';
         advance();
-        return newSymbol(symEQ,linenum,cp, s);
+        if (nextChar == '=') {
+          s[n++]=nextChar;
+          s[n]='\0';
+          advance();
+          return newSymbol(symEQ,linenum,cp, s);
+        }
+        s[n]='\0';
+        return newSymbol(symASSIGN,linenum,cp, s);
+      case '!':
+        s[n++] = nextChar;
+        advance();
+        if (nextChar == '=') {
+          s[n++]=nextChar;
+          advance();
+          s[n]='\0';
+          return newSymbol(symNEQ,linenum,cp,s);
+        }
+        else {
+          s[n] = '\0';
+          return newSymbol(symNOT,linenum,cp,s);
+        }
       case '<':
         s[n++]=nextChar;
         s[n]='\0';
@@ -130,13 +208,6 @@ struct symbolTag *nextToken()
           advance();
           s[n]='\0';
           return newSymbol(symLEQ,linenum,cp,s);
-        }
-        else if (nextChar=='>')
-        {
-          s[n++]=nextChar;
-          advance();
-          s[n]='\0';
-          return newSymbol(symNEQ,linenum,cp,s);
         }
         else
         {
@@ -157,21 +228,6 @@ struct symbolTag *nextToken()
         {
           return newSymbol(symGREATER,linenum,cp,s);
         }
-      case ':':
-        s[n++]=nextChar;
-        s[n]='\0';
-        advance();
-        if (nextChar=='=')
-        {
-          s[n++]=nextChar;
-          advance();
-          s[n]='\0';
-          return newSymbol(symBECOMES,linenum,cp, s);
-        }
-        else
-        {
-          return newSymbol(symerror,linenum,cp, s);
-        }
       case '"':
         advance();
         while (nextChar!='"')
@@ -190,7 +246,7 @@ struct symbolTag *nextToken()
         advance();          //?????????r??
         break;
       case -1:
-        return NULL;
+        return newSymbol(symEOF,linenum,cp,"");
       default:
         s[n++]=nextChar;
         s[n]='\0';

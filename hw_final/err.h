@@ -1,7 +1,7 @@
 #ifndef ERR_H
 #define ERR_H
 
-#define ERRMAX 27
+#define ERRMAX 28
 char errmsgs[ERRMAX][36]=
 {
   "必須跟著句點.",              /*errmsgs[0] */
@@ -30,7 +30,8 @@ char errmsgs[ERRMAX][36]=
   "飛越至下一個敘述",           /*errmsgs[23]*/
   "CONST宣告常數重複",          /*errmsgs[24]*/
   "VAR宣告變數重複",            /*errmsgs[25]*/
-  "識別字沒有宣告"              /*errmsgs[26]*/
+  "識別字沒有宣告",              /*errmsgs[26]*/
+  "違法datatype"              /*errmsgs[27]*/
 };
 
 # endif

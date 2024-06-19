@@ -4,5 +4,6 @@
 *.com
 *.bat
 *.vscode
+*.txt
 test.c
 a.exe
